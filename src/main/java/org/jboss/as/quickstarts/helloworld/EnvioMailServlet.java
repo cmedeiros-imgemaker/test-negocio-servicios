@@ -11,23 +11,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cl.subdere.componente.negocio.contracts.SendEmailInput;
-import cl.subdere.componente.negocio.exceptions.NegocioException;
 import cl.subdere.componente.negocio.negocio.SenderEmailManagerRemote;
 
 /**
  * Servlet implementation class EnvioMailServlet
  */
+
 @SuppressWarnings("serial")
 @WebServlet("/EnvioMail")
 public class EnvioMailServlet extends HttpServlet {
 	   
 	static String PAGE_HEADER = "<html><head><title>helloworld</title></head><body>";
 	static String PAGE_FOOTER = "</body></html>";
-
-	@EJB(mappedName = "java:global/negocio-subdere/SenderEmail!cl.subdere.componente.negocio.negocio.SenderEmailManagerRemote")
-	SenderEmailManagerRemote senderEmail;
 	
-    /**
+	@EJB(lookup = "java:global/negocio-subdere/SenderEmail!cl.subdere.componente.negocio.negocio.SenderEmailManagerRemote")
+	private SenderEmailManagerRemote senderManager;
+	
+	/**
      * @see HttpServlet#HttpServlet()
      */
     public EnvioMailServlet() {
@@ -44,10 +44,20 @@ public class EnvioMailServlet extends HttpServlet {
 		input.setSubject(request.getParameter("subject"));
 		input.setType(1);
 		try {
-			senderEmail.sendAsync(input);
-		} catch (NegocioException e) {
+			senderManager.sendAsync(input);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		/*
+		QueueProducer queueProducer = new QueueProducer();
+		try {
+			queueProducer.sendMessage(input);
+		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
+		*/
 		response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
         writer.println(PAGE_HEADER);
